@@ -2,7 +2,7 @@
 
 Interactive tool to filter CMU courses by degree requirements, department, level, and schedule conflicts.
 
-**[Live Demo →](https://xhriztina.github.io/cmu-schedule-helper/)**
+**[Live Demo →](https://YOUR_USERNAME.github.io/cmu-schedule-helper/)**
 
 ## Features
 

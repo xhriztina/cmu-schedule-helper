@@ -89,8 +89,9 @@ class CMUScheduleParser(HTMLParser):
                 "deptName": self.current_department or "",
                 "sections": []
             }
+            location = cells[7] if len(cells) > 7 and cells[7] != '\xa0' else ""
             self.current_course["sections"].append({
-                "id": sec, "days": days, "begin": begin, "end": end
+                "id": sec, "days": days, "begin": begin, "end": end, "loc": location
             })
             self.courses.append(self.current_course)
 
@@ -101,10 +102,11 @@ class CMUScheduleParser(HTMLParser):
             days = cells[4] if len(cells) > 4 and cells[4] != '\xa0' else ""
             begin = cells[5] if len(cells) > 5 and cells[5] != '\xa0' else ""
             end = cells[6] if len(cells) > 6 and cells[6] != '\xa0' else ""
+            location = cells[7] if len(cells) > 7 and cells[7] != '\xa0' else ""
 
             if sec or days:
                 self.current_course["sections"].append({
-                    "id": sec, "days": days, "begin": begin, "end": end
+                    "id": sec, "days": days, "begin": begin, "end": end, "loc": location
                 })
             if title_text and not sec and not days:
                 if self.current_course["title"]:

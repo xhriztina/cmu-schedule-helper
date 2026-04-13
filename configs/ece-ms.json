@@ -1,15 +1,30 @@
 {
   "id": "ece-ms",
-  "name": "ECE M.S. Elective Requirements",
-  "description": "Elective requirements for the ECE Master of Science degree at Carnegie Mellon University.",
+  "name": "ECE M.S. (Standard Program)",
+  "description": "MS in Electrical and Computer Engineering — 97 units of graduate coursework (600+). Includes ECE Core, CIT Elective, General Technical Elective, and Intro to Graduate Studies.",
   "categories": [
+    {
+      "id": "ece-core",
+      "name": "ECE Core",
+      "description": "60 units (or 36 for Intensive Project) of graduate coursework (600+) within ECE (18-XXX). Up to 12 project units can count toward Core.",
+      "color": "#f97316",
+      "minLevel": 600,
+      "departments": ["18"],
+      "includeCourses": [],
+      "excludeCourses": [
+        "18-601", "18-602", "18-603", "18-605", "18-606",
+        "18-700", "18-701", "18-702", "18-703"
+      ],
+      "notes": "18-601 through 18-606 and 18-700 through 18-703 cannot count toward ECE Core but may count toward CIT or General Technical Electives. 18-994 counts as elective only."
+    },
     {
       "id": "cit-elective",
       "name": "CIT Elective",
-      "description": "24 units (or 12 for Intensive Project) of graduate coursework (600+) within CIT departments.",
+      "description": "24 units (or 12 for Intensive Project) of graduate coursework (600+) within CIT departments. Up to 15 project units can count toward CIT Elective.",
       "color": "#60a5fa",
       "minLevel": 600,
       "departments": ["18", "39", "42", "06", "12", "19", "14", "49", "27", "24", "04"],
+      "includeCourses": [],
       "excludeCourses": [
         "19-602", "19-655",
         "49-750", "49-751", "49-761", "49-762", "49-763", "49-764", "49-765",
@@ -19,7 +34,7 @@
         "24-792",
         "04-601", "04-602", "04-605", "04-900", "04-980"
       ],
-      "notes": "39-699 and 18-994 count as elective only. Excluded CIT courses may still count toward General Technical Elective."
+      "notes": "39-699 and 18-994 count as elective only. Excluded CIT courses (19-602, 19-655, 49-7XX, 24-792, 04-6XX/9XX) may still count toward General Technical Elective."
     },
     {
       "id": "general-tech",
@@ -49,7 +64,18 @@
         "99-783"
       ],
       "excludeCourses": [],
-      "notes": "Courses from any of the listed programs, plus individually approved courses."
+      "notes": "39-699 and 18-994 count as elective only. CIT courses excluded from CIT Elective (e.g. 19-602, 49-7XX) can still count here."
+    },
+    {
+      "id": "intro-grad",
+      "name": "Intro to Grad Studies",
+      "description": "1 unit — must be taken in your first semester. Conflicts are not permitted.",
+      "color": "#a78bfa",
+      "minLevel": 900,
+      "departments": [],
+      "includeCourses": ["18-989"],
+      "excludeCourses": [],
+      "notes": "18-989 Introduction to Graduate Studies. Required first semester, no conflicts permitted."
     }
   ]
 }

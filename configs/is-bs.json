@@ -1,0 +1,197 @@
+{
+  "id": "is-bs",
+  "name": "Information Systems B.S.",
+  "description": "BS in Information Systems — Technical core, IS core, breadth requirements, concentrations, and Heinz electives.",
+  "categories": [
+    {
+      "id": "tech-prereq",
+      "name": "Technical Core (Prerequisites)",
+      "description": "Math, CS, and foundational courses required before IS core.",
+      "color": "#94a3b8",
+      "minLevel": 0,
+      "departments": [],
+      "includeCourses": [
+        "21-112", "21-120", "21-127", "21-240",
+        "80-210",
+        "15-110", "15-112", "02-120", "15-121"
+      ],
+      "excludeCourses": [],
+      "notes": "One math course (21-112, 21-120, 21-127, 21-240, or 80-210), plus 15-110, 15-112 (or 02-120), and 15-121."
+    },
+    {
+      "id": "is-core",
+      "name": "IS Core",
+      "description": "Required IS core courses including colloquia, database, software engineering, digital transformation, and HCI.",
+      "color": "#f97316",
+      "minLevel": 0,
+      "departments": [],
+      "includeCourses": [
+        "67-100", "67-200", "67-262",
+        "17-313",
+        "95-422",
+        "05-391", "05-410", "05-452"
+      ],
+      "excludeCourses": [],
+      "notes": "All required: 67-100, 67-200, 67-262, 17-313, 95-422, plus one of 05-391/05-410/05-452."
+    },
+    {
+      "id": "breadth-comm",
+      "name": "Breadth: Professional Comm",
+      "description": "One course from Professional Communications breadth category.",
+      "color": "#60a5fa",
+      "minLevel": 0,
+      "departments": [],
+      "includeCourses": [
+        "05-317", "05-360",
+        "36-315",
+        "51-261",
+        "67-336",
+        "70-321", "70-340", "70-342", "70-350",
+        "76-270",
+        "88-230", "88-341", "70-341"
+      ],
+      "excludeCourses": [],
+      "notes": "One course required from this list."
+    },
+    {
+      "id": "breadth-quant",
+      "name": "Breadth: Quantitative Analysis",
+      "description": "One course from Quantitative Analysis & Research Methods breadth category.",
+      "color": "#a78bfa",
+      "minLevel": 0,
+      "departments": [],
+      "includeCourses": [
+        "21-325",
+        "36-202", "36-225", "36-235", "36-309", "36-315", "36-350", "36-401",
+        "73-265",
+        "80-305",
+        "88-251", "88-252"
+      ],
+      "excludeCourses": [],
+      "notes": "One course required from this list."
+    },
+    {
+      "id": "breadth-innov",
+      "name": "Breadth: Innovation & Entrepreneurship",
+      "description": "One course after completing 67-272 Application Design & Development.",
+      "color": "#fbbf24",
+      "minLevel": 0,
+      "departments": [],
+      "includeCourses": [
+        "67-272", "67-443",
+        "94-491"
+      ],
+      "excludeCourses": [],
+      "notes": "Must complete 67-272 first, then take 67-443 or 94-491."
+    },
+    {
+      "id": "conc-ai-mgmt",
+      "name": "Concentration: AI Management",
+      "description": "AI fundamentals, operationalizing AI, ethics, and summative course.",
+      "color": "#e879f9",
+      "minLevel": 0,
+      "departments": [],
+      "includeCourses": [
+        "17-209",
+        "94-879", "94-829", "05-317", "94-894",
+        "94-885", "67-348",
+        "94-844", "95-820", "95-767"
+      ],
+      "excludeCourses": [],
+      "notes": "One from each sub-category: AI Fundamentals, Operationalizing AI, Ethics of AI, and a Summative Course. Heinz courses (94/95-XXX) available junior/senior year only."
+    },
+    {
+      "id": "conc-data",
+      "name": "Concentration: Data Analytics",
+      "description": "Data cleaning/visualization, analysis, ML focus, and summative course.",
+      "color": "#34d399",
+      "minLevel": 0,
+      "departments": [],
+      "includeCourses": [
+        "36-315", "67-336",
+        "36-202", "05-434", "11-344",
+        "07-280", "10-301", "70-467",
+        "94-489"
+      ],
+      "excludeCourses": [],
+      "notes": "One from each sub-category. 36-315 cannot double-count for breadth if used here. 05-434/11-344 can only count toward one sub-category. Summative: 94-489 (Heinz, junior/senior only)."
+    },
+    {
+      "id": "conc-infosec",
+      "name": "Concentration: Info Security",
+      "description": "Foundation, technical security, and policy/management courses.",
+      "color": "#f43f5e",
+      "minLevel": 0,
+      "departments": [],
+      "includeCourses": [
+        "95-452", "95-752",
+        "94-806", "95-747", "95-758", "95-748",
+        "95-743", "95-723", "95-818", "95-824", "95-844"
+      ],
+      "excludeCourses": [],
+      "notes": "Foundation (95-452 or 95-752), at least one technical security course, at least one policy/management course. All are Heinz courses — junior/senior year only."
+    },
+    {
+      "id": "conc-ux",
+      "name": "Concentration: UX",
+      "description": "Fundamentals, grid design, toolkit, and summative course.",
+      "color": "#fb923c",
+      "minLevel": 0,
+      "departments": [],
+      "includeCourses": [
+        "05-360", "51-261",
+        "76-391", "90-401",
+        "05-291", "05-452", "49-313", "62-142", "76-481",
+        "05-315"
+      ],
+      "excludeCourses": [],
+      "notes": "One from each sub-category: Fundamentals, Grid Design, Toolkit, plus summative course 05-315. 05-452 cannot double-count for IS Core HCI requirement."
+    },
+    {
+      "id": "conc-product",
+      "name": "Concentration: Product Mgmt",
+      "description": "Required UX research course, strategic decision making, and marketing/finance.",
+      "color": "#2dd4bf",
+      "minLevel": 0,
+      "departments": [],
+      "includeCourses": [
+        "67-368",
+        "95-851",
+        "90-710", "94-708"
+      ],
+      "excludeCourses": [],
+      "notes": "67-368 required, plus one strategic decision making course and one marketing/finance course. Heinz courses available junior/senior year only."
+    },
+    {
+      "id": "heinz-electives",
+      "name": "Heinz Courses (Jr/Sr)",
+      "description": "Heinz College courses available to IS students in junior and senior years.",
+      "color": "#818cf8",
+      "minLevel": 0,
+      "departments": [],
+      "includeCourses": [
+        "90-401", "90-403", "90-404", "90-435", "90-436", "90-440", "90-442",
+        "93-430",
+        "94-401", "94-408", "94-413", "94-423", "94-431", "94-433", "94-454",
+        "94-486", "94-489", "94-491",
+        "95-408", "95-410", "95-433", "95-444", "95-451", "95-452", "95-475",
+        "95-483", "95-499"
+      ],
+      "excludeCourses": [],
+      "notes": "IS students can only take Heinz courses in their junior and senior years."
+    },
+    {
+      "id": "is-electives",
+      "name": "IS Electives (Optional)",
+      "description": "Optional IS department courses not required for graduation.",
+      "color": "#64748b",
+      "minLevel": 0,
+      "departments": [],
+      "includeCourses": [
+        "67-342", "67-347", "67-348", "67-368"
+      ],
+      "excludeCourses": [],
+      "notes": "These are optional courses — not required for graduation but available to IS students."
+    }
+  ]
+}

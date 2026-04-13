@@ -154,7 +154,7 @@ const {useState,useEffect,useMemo,useCallback,useRef} = React;
 
 // ── Config: which configs to list in the picker ──
 // Add your own config filenames here:
-const BUILTIN_CONFIGS = ["ece-ms"];
+const BUILTIN_CONFIGS = ["ece-ms", "ece-bs", "is-bs"];
 
 const DEPT_NAMES = {"02":"Computational Biology","03":"Biological Sciences","04":"CMU-Africa / ICT","05":"Human-Computer Interaction","06":"Chemical Engineering","07":"SCS Interdisciplinary","08":"Software Research","09":"Chemistry","10":"Machine Learning","11":"Language Technologies","12":"Civil & Environmental Eng","14":"Information Networking","15":"Computer Science","16":"Robotics","17":"Software & Societal Systems","18":"ECE","19":"Engineering & Public Policy","21":"Mathematical Sciences","24":"Mechanical Engineering","27":"Materials Science & Eng","33":"Physics","36":"Statistics & Data Science","39":"CIT Interdisciplinary","42":"Biomedical Engineering","45":"Tepper","49":"Integrated Innovation","53":"Entertainment Technology","86":"Neuroscience","94":"Heinz College Wide","95":"Information Systems (Heinz)","99":"CMU-Wide Studies"};
 
@@ -339,6 +339,7 @@ function App() {
   const [blockDays, setBlockDays] = useState('TR');
   const [blockStart, setBlockStart] = useState('11:00AM');
   const [blockEnd, setBlockEnd] = useState('12:20PM');
+  const [locationFilter, setLocationFilter] = useState('Pittsburgh, Pennsylvania');
 
   // Config state
   const [configs, setConfigs] = useState([]);
@@ -456,6 +457,12 @@ function App() {
       if (c.level < minLevel) return false;
       if (selectedDepts.size && !selectedDepts.has(c.dept)) return false;
 
+      // Location filter: course must have at least one section at the selected location
+      if (locationFilter) {
+        const hasLoc = c.sections.some(s => s.loc === locationFilter || (!s.loc && !s.days));
+        if (!hasLoc) return false;
+      }
+
       // Requirement filter
       if (reqFilter !== 'any' && activeConfig) {
         const cat = activeConfig.categories.find(cat => cat.id === reqFilter);
@@ -469,7 +476,13 @@ function App() {
       }
       return true;
     });
-  }, [courses,search,minLevel,selectedDepts,reqFilter,blocked,filterConflicts,activeConfig]);
+  }, [courses,search,minLevel,selectedDepts,reqFilter,blocked,filterConflicts,activeConfig,locationFilter]);
+
+  const allLocations = useMemo(() => {
+    const s = new Set();
+    courses.forEach(c => c.sections.forEach(sec => { if (sec.loc) s.add(sec.loc); }));
+    return [...s].sort();
+  }, [courses]);
 
   const grouped = useMemo(() => {
     const g={};
@@ -520,6 +533,14 @@ function App() {
             <select value={minLevel} onChange={e=>setMinLevel(+e.target.value)}>
               <option value={0}>All levels</option>
               {[100,200,300,400,500,600,700,800].map(l=><option key={l} value={l}>{l}+{l===600?' (Graduate)':''}</option>)}
+            </select>
+          </div>
+
+          <div className="filter-section">
+            <div className="filter-label">Campus / Location</div>
+            <select value={locationFilter} onChange={e=>setLocationFilter(e.target.value)}>
+              <option value="">All locations</option>
+              {allLocations.map(l=><option key={l} value={l}>{l}</option>)}
             </select>
           </div>
 
@@ -622,10 +643,12 @@ function App() {
                             {c.sections.map((s,i)=>{
                               const conflict=blocked.length>0&&secConflicts([s.id,s.days,s.begin,s.end],blocked);
                               const isTba=s.days==='TBA'||!s.begin;
+                              const diffLoc = locationFilter && s.loc && s.loc !== locationFilter;
                               return(
-                                <div key={i} className="detail-section" style={conflict?{borderColor:'var(--accent-dim)',opacity:0.5}:isTba?{}:{borderColor:'rgba(52,211,153,0.2)'}}>
+                                <div key={i} className="detail-section" style={conflict?{borderColor:'var(--accent-dim)',opacity:0.5}:diffLoc?{opacity:0.4}:isTba?{}:{borderColor:'rgba(52,211,153,0.2)'}}>
                                   <div className="detail-section-id" style={conflict?{color:'var(--accent)',textDecoration:'line-through'}:{}}>{s.id||'—'}</div>
                                   <div className="detail-section-time">{isTba?'TBA':`${s.days} ${s.begin}–${s.end}`}{conflict&&' ✕'}</div>
+                                  {s.loc && s.loc !== 'Pittsburgh, Pennsylvania' && <div style={{fontSize:10,color:'var(--yellow)',marginTop:1}}>{s.loc}</div>}
                                 </div>
                               );
                             })}
