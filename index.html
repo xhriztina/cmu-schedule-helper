@@ -339,7 +339,7 @@ function App() {
   const [blockDays, setBlockDays] = useState('TR');
   const [blockStart, setBlockStart] = useState('11:00AM');
   const [blockEnd, setBlockEnd] = useState('12:20PM');
-  const [locationFilter, setLocationFilter] = useState('Pittsburgh, Pennsylvania');
+  const [locationFilter, setLocationFilter] = useState('');
 
   // Config state
   const [configs, setConfigs] = useState([]);
@@ -354,7 +354,12 @@ function App() {
   useEffect(() => {
     fetch('data/courses.json')
       .then(r => {if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();})
-      .then(d => setCourseData(d))
+      .then(d => {
+        setCourseData(d);
+        // Auto-select Pittsburgh if location data exists
+        const hasLoc = d.courses?.some(c => c.sections?.some(s => s.loc));
+        if (hasLoc) setLocationFilter('Pittsburgh, Pennsylvania');
+      })
       .catch(e => setLoadError(e.message));
   }, []);
 
@@ -459,8 +464,11 @@ function App() {
 
       // Location filter: course must have at least one section at the selected location
       if (locationFilter) {
-        const hasLoc = c.sections.some(s => s.loc === locationFilter || (!s.loc && !s.days));
-        if (!hasLoc) return false;
+        const hasMatchingSection = c.sections.some(s => {
+          if (!s.loc) return false; // section has no location data — skip
+          return s.loc === locationFilter;
+        });
+        if (!hasMatchingSection) return false;
       }
 
       // Requirement filter
