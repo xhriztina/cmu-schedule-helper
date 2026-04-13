@@ -359,13 +359,13 @@ function App() {
 
   // Load built-in configs
   useEffect(() => {
-    for (const name of BUILTIN_CONFIGS) {
-      fetch(`configs/${name}.json`)
-        .then(r=>r.ok?r.json():null)
-        .then(d=>{if(d)setConfigs(prev=>{if(prev.find(c=>c.id===d.id))return prev;return[...prev,d];});})
-        .catch(()=>{});
-    }
-    // Load from localStorage
+    // Check localStorage for previously selected config
+    let savedActiveId = null;
+    try {
+      savedActiveId = localStorage.getItem('cmu-schedule-helper-active-config');
+    } catch(e) {}
+
+    // Load custom configs from localStorage
     try {
       const saved = localStorage.getItem('cmu-schedule-helper-configs');
       if (saved) {
@@ -375,9 +375,24 @@ function App() {
           return [...prev, ...parsed.filter(c=>!ids.has(c.id))];
         });
       }
-      const activeId = localStorage.getItem('cmu-schedule-helper-active-config');
-      if (activeId) setActiveConfigId(activeId);
     } catch(e) {}
+
+    // Fetch all builtin configs, then auto-select
+    Promise.all(
+      BUILTIN_CONFIGS.map(name =>
+        fetch(`configs/${name}.json`).then(r=>r.ok?r.json():null).catch(()=>null)
+      )
+    ).then(results => {
+      const loaded = results.filter(Boolean);
+      if (loaded.length) {
+        setConfigs(prev => {
+          const ids = new Set(prev.map(c=>c.id));
+          return [...prev, ...loaded.filter(c=>!ids.has(c.id))];
+        });
+        // Auto-select: use saved preference, or default to first builtin
+        setActiveConfigId(prev => prev || savedActiveId || loaded[0].id);
+      }
+    });
   }, []);
 
   // Persist configs
