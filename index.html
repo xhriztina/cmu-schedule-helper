@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMU Schedule Helper</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0c0f; --surface: #16161b; --surface2: #1e1e25; --surface3: #26262f;
+  --border: #2a2a35; --border-hover: #3a3a48;
+  --text: #e8e6f0; --text-dim: #8a889a; --text-muted: #5a586a;
+  --accent: #c41230; --accent-dim: #8a0d22; --accent-glow: rgba(196,18,48,0.15);
+  --green: #34d399; --green-dim: rgba(52,211,153,0.12);
+  --yellow: #fbbf24; --yellow-dim: rgba(251,191,36,0.12);
+  --blue: #60a5fa; --blue-dim: rgba(96,165,250,0.12);
+  --orange: #fb923c; --orange-dim: rgba(251,146,60,0.12);
+  --radius: 6px;
+  --mono: 'DM Mono', monospace;
+  --sans: 'Instrument Sans', system-ui, sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:var(--sans); font-size:14px; line-height:1.5; }
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+.app-header {
+  padding:20px 28px 16px; border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,#12121a 0%,var(--bg) 100%);
+  position:sticky; top:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+}
+.header-left { display:flex; align-items:baseline; gap:12px; }
+.app-title { font-family:var(--mono); font-size:12px; font-weight:500; color:var(--accent); letter-spacing:0.1em; text-transform:uppercase; }
+.app-semester { font-size:20px; font-weight:700; letter-spacing:-0.02em; }
+.app-semester span { color:var(--text-dim); font-weight:400; font-size:14px; }
+.header-right { display:flex; gap:8px; align-items:center; }
+
+.layout { display:grid; grid-template-columns:340px 1fr; min-height:calc(100vh - 70px); }
+.sidebar { border-right:1px solid var(--border); padding:16px; overflow-y:auto; max-height:calc(100vh - 70px); position:sticky; top:70px; }
+.main-content { padding:16px 20px; overflow-y:auto; max-height:calc(100vh - 70px); }
+
+select, input[type="text"], input[type="number"], textarea {
+  width:100%; padding:7px 10px; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); color:var(--text); font-family:var(--sans); font-size:13px; outline:none; transition:border-color 0.15s;
+}
+select:focus, input:focus, textarea:focus { border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-glow); }
+select { cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238a889a'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; padding-right:28px; }
+textarea { font-family:var(--mono); font-size:12px; resize:vertical; min-height:120px; }
+
+.filter-section { margin-bottom:16px; }
+.filter-label { font-family:var(--mono); font-size:10px; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:6px; }
+.chip-group { display:flex; flex-wrap:wrap; gap:4px; }
+.chip { padding:3px 9px; border-radius:99px; font-size:11px; font-weight:500; cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--text-dim); transition:all 0.15s; user-select:none; }
+.chip:hover { border-color:var(--border-hover); color:var(--text); }
+.chip.active { background:var(--accent-glow); border-color:var(--accent); color:var(--accent); }
+.chip.active-green { background:var(--green-dim); border-color:var(--green); color:var(--green); }
+
+.btn { padding:6px 12px; border-radius:var(--radius); border:1px solid var(--border); background:var(--surface); color:var(--text-dim); font-family:var(--sans); font-size:12px; font-weight:500; cursor:pointer; transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; }
+.btn:hover { border-color:var(--border-hover); color:var(--text); background:var(--surface2); }
+.btn-accent { border-color:var(--accent-dim); color:var(--accent); background:var(--accent-glow); }
+.btn-accent:hover { background:var(--accent-dim); color:#fff; }
+.btn-sm { padding:3px 8px; font-size:11px; }
+.btn-green { border-color:rgba(52,211,153,0.3); color:var(--green); background:var(--green-dim); }
+.btn-green:hover { background:rgba(52,211,153,0.2); }
+
+.time-block { display:flex; gap:5px; margin-bottom:5px; align-items:center; }
+.time-block input { flex:1; font-family:var(--mono); font-size:12px; }
+.blocked-item { display:flex; align-items:center; justify-content:space-between; padding:4px 8px; background:var(--surface2); border-radius:var(--radius); margin-bottom:3px; font-family:var(--mono); font-size:11px; color:var(--yellow); }
+.blocked-item button { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px; padding:0 2px; }
+.blocked-item button:hover { color:var(--accent); }
+
+.toggle-row { display:flex; align-items:center; justify-content:space-between; padding:5px 0; }
+.toggle-label { font-size:12px; color:var(--text-dim); }
+.toggle { width:36px; height:20px; border-radius:99px; background:var(--surface3); border:1px solid var(--border); cursor:pointer; position:relative; transition:all 0.2s; flex-shrink:0; }
+.toggle.on { background:var(--accent-glow); border-color:var(--accent); }
+.toggle::after { content:''; position:absolute; width:14px; height:14px; border-radius:50%; background:var(--text-dim); top:2px; left:2px; transition:all 0.2s; }
+.toggle.on::after { left:18px; background:var(--accent); }
+
+.divider { height:1px; background:var(--border); margin:14px 0; }
+
+.results-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid var(--border); flex-wrap:wrap; gap:8px; }
+.results-count { font-family:var(--mono); font-size:13px; color:var(--text-dim); }
+.results-count strong { color:var(--text); font-weight:600; }
+
+.dept-group { margin-bottom:20px; }
+.dept-group-header { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); padding:5px 0; margin-bottom:3px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg); z-index:10; }
+.course-row { display:grid; grid-template-columns:72px 1fr 56px; gap:10px; padding:8px 8px; border-radius:var(--radius); transition:background 0.1s; cursor:pointer; align-items:start; }
+.course-row:hover { background:var(--surface); }
+.course-num { font-family:var(--mono); font-size:13px; font-weight:500; color:var(--blue); white-space:nowrap; }
+.course-title { font-size:13px; font-weight:500; color:var(--text); line-height:1.3; }
+.course-units { font-family:var(--mono); font-size:12px; color:var(--text-dim); text-align:right; white-space:nowrap; }
+.req-badge { display:inline-block; font-family:var(--mono); font-size:9px; font-weight:500; text-transform:uppercase; letter-spacing:0.04em; padding:1px 5px; border-radius:3px; margin-left:5px; vertical-align:middle; }
+
+.expanded-detail { grid-column:1/-1; padding:6px 8px 6px 84px; animation:slideDown 0.15s ease; }
+@keyframes slideDown { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+.detail-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:5px; }
+.detail-section { padding:5px 9px; background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); }
+.detail-section-id { font-family:var(--mono); font-size:11px; font-weight:500; color:var(--text); }
+.detail-section-time { font-family:var(--mono); font-size:11px; color:var(--text-dim); }
+
+.search-box { position:relative; margin-bottom:12px; }
+.search-box input { padding-left:30px; }
+.search-box svg { position:absolute; left:9px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--text-muted); }
+
+.empty-state { text-align:center; padding:50px 20px; color:var(--text-muted); }
+.empty-state h3 { font-size:16px; margin-bottom:6px; color:var(--text-dim); }
+.loading { display:flex; flex-direction:column; align-items:center; justify-content:center; height:300px; color:var(--text-dim); font-family:var(--mono); font-size:13px; gap:8px; }
+
+.ics-upload input[type="file"] { display:none; }
+.ics-upload label { display:flex; align-items:center; gap:6px; padding:7px 12px; border:1px dashed var(--border); border-radius:var(--radius); cursor:pointer; font-size:12px; color:var(--text-dim); transition:all 0.15s; }
+.ics-upload label:hover { border-color:var(--accent); color:var(--text); }
+
+/* Modal */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px; }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:10px; max-width:700px; width:100%; max-height:85vh; overflow-y:auto; }
+.modal-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.modal-header h2 { font-size:16px; font-weight:600; }
+.modal-body { padding:20px; }
+.modal-footer { padding:12px 20px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; }
+.modal-close { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:20px; padding:4px; }
+.modal-close:hover { color:var(--text); }
+
+.config-card { padding:12px 16px; border:1px solid var(--border); border-radius:var(--radius); margin-bottom:8px; cursor:pointer; transition:all 0.15s; }
+.config-card:hover { border-color:var(--accent); background:var(--accent-glow); }
+.config-card.active { border-color:var(--accent); background:var(--accent-glow); }
+.config-card h4 { font-size:14px; margin-bottom:2px; }
+.config-card p { font-size:12px; color:var(--text-dim); margin:0; }
+
+.cat-editor { padding:12px; border:1px solid var(--border); border-radius:var(--radius); margin-bottom:10px; background:var(--surface2); }
+.cat-editor-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.form-row { display:flex; gap:8px; margin-bottom:8px; }
+.form-row > * { flex:1; }
+.form-label { font-size:11px; color:var(--text-muted); margin-bottom:3px; font-family:var(--mono); }
+
+.info-box { padding:10px 14px; border-radius:var(--radius); font-size:12px; line-height:1.5; margin-bottom:12px; }
+.info-box.note { background:var(--blue-dim); border:1px solid rgba(96,165,250,0.2); color:var(--blue); }
+
+@media(max-width:768px) {
+  .layout { grid-template-columns:1fr; }
+  .sidebar { position:relative; top:0; max-height:none; border-right:none; border-bottom:1px solid var(--border); }
+  .main-content { max-height:none; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script type="text/babel">
+const {useState,useEffect,useMemo,useCallback,useRef} = React;
+
+// ── Config: which configs to list in the picker ──
+// Add your own config filenames here:
+const BUILTIN_CONFIGS = ["ece-ms"];
+
+const DEPT_NAMES = {"02":"Computational Biology","03":"Biological Sciences","04":"CMU-Africa / ICT","05":"Human-Computer Interaction","06":"Chemical Engineering","07":"SCS Interdisciplinary","08":"Software Research","09":"Chemistry","10":"Machine Learning","11":"Language Technologies","12":"Civil & Environmental Eng","14":"Information Networking","15":"Computer Science","16":"Robotics","17":"Software & Societal Systems","18":"ECE","19":"Engineering & Public Policy","21":"Mathematical Sciences","24":"Mechanical Engineering","27":"Materials Science & Eng","33":"Physics","36":"Statistics & Data Science","39":"CIT Interdisciplinary","42":"Biomedical Engineering","45":"Tepper","49":"Integrated Innovation","53":"Entertainment Technology","86":"Neuroscience","94":"Heinz College Wide","95":"Information Systems (Heinz)","99":"CMU-Wide Studies"};
+
+const DEPT_GROUPS = {
+  'CIT':['18','39','42','06','12','19','14','49','27','24','04'],
+  'SCS':['02','15','08','16','05','11','10','17'],
+  'MCS':['03','09','21','33'],
+  'Dietrich':['36','86'],
+  'Heinz':['95','94'],
+  'Tepper':['45'],
+};
+
+// ── Time utils ──
+const DAY_MAP={M:'Mon',T:'Tue',W:'Wed',R:'Thu',F:'Fri',U:'Sat',S:'Sun'};
+function parseTime(t){if(!t)return null;const m=t.match(/(\d+):(\d+)(AM|PM)/i);if(!m)return null;let h=+m[1],mn=+m[2];if(m[3].toUpperCase()==='PM'&&h!==12)h+=12;if(m[3].toUpperCase()==='AM'&&h===12)h=0;return h*60+mn;}
+function expandDays(s){if(!s||s==='TBA')return [];return[...s].filter(c=>DAY_MAP[c]).map(c=>DAY_MAP[c]);}
+function fmtMin(m){const h=Math.floor(m/60),mm=m%60,ap=h>=12?'PM':'AM',hh=h>12?h-12:(h===0?12:h);return`${hh}:${mm.toString().padStart(2,'0')}${ap}`;}
+function overlap(s1,e1,s2,e2){return s1<e2&&s2<e1;}
+function secConflicts(sec,blocked){if(!blocked.length)return false;const[id,days,begin,end]=sec;if(!days||days==='TBA'||!begin||!end)return false;const ds=expandDays(days),s=parseTime(begin),e=parseTime(end);if(s==null||e==null)return false;for(const[d,bs,be]of blocked){if(ds.includes(d)&&overlap(s,e,bs,be))return true;}return false;}
+function courseHasOption(c,blocked){if(!blocked.length)return true;const secs=c.sections;const lecs=secs.filter(s=>s.id&&s.id.startsWith('Lec'));const rest=secs.filter(s=>s.id&&!s.id.startsWith('Lec'));if(lecs.length&&!lecs.some(l=>!secConflicts([l.id,l.days,l.begin,l.end],blocked)))return false;if(rest.length&&!rest.some(s=>!secConflicts([s.id,s.days,s.begin,s.end],blocked)))return false;return true;}
+
+function courseMatchesCategory(course, cat) {
+  if (course.level < (cat.minLevel || 0)) return false;
+  const inDept = cat.departments && cat.departments.includes(course.dept);
+  const included = cat.includeCourses && cat.includeCourses.includes(course.num);
+  const excluded = cat.excludeCourses && cat.excludeCourses.includes(course.num);
+  if (excluded) return false;
+  return inDept || included;
+}
+
+// ── ICS Parser ──
+function parseICS(text){const blocks=[];const icsDay={MO:'Mon',TU:'Tue',WE:'Wed',TH:'Thu',FR:'Fri',SA:'Sat',SU:'Sun'};const events=text.split('BEGIN:VEVENT');for(const ev of events.slice(1)){const dtS=ev.match(/DTSTART[^:]*:(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})/);const dtE=ev.match(/DTEND[^:]*:(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})/);if(!dtS||!dtE)continue;const sMin=+dtS[4]*60+ +dtS[5],eMin=+dtE[4]*60+ +dtE[5];const byday=ev.match(/BYDAY=([A-Z,]+)/);if(byday){for(const d of byday[1].split(',')){if(icsDay[d])blocks.push([icsDay[d],sMin,eMin]);}}else{const dt=new Date(+dtS[1],+dtS[2]-1,+dtS[3]);blocks.push([['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()],sMin,eMin]);}}return blocks;}
+
+// ── Config Editor Modal ──
+function ConfigEditorModal({initial, onSave, onClose}) {
+  const [cfg, setCfg] = useState(initial || {id:'',name:'',description:'',categories:[]});
+  const [jsonMode, setJsonMode] = useState(false);
+  const [jsonText, setJsonText] = useState('');
+
+  const updateField = (k,v) => setCfg(prev => ({...prev, [k]:v}));
+  const addCategory = () => setCfg(prev => ({...prev, categories:[...prev.categories, {id:'cat-'+(prev.categories.length+1),name:'',description:'',color:'#60a5fa',minLevel:600,departments:[],includeCourses:[],excludeCourses:[],notes:''}]}));
+  const removeCategory = (i) => setCfg(prev => ({...prev, categories:prev.categories.filter((_,j)=>j!==i)}));
+  const updateCat = (i,k,v) => setCfg(prev => {const cats=[...prev.categories];cats[i]={...cats[i],[k]:v};return{...prev,categories:cats};});
+
+  const handleExport = () => {
+    const blob = new Blob([JSON.stringify(cfg,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=`${cfg.id||'config'}.json`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportJson = () => {
+    try { const parsed = JSON.parse(jsonText); setCfg(parsed); setJsonMode(false); }
+    catch(e) { alert('Invalid JSON: '+e.message); }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>{initial ? 'Edit' : 'Create'} Requirement Config</h2>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="modal-body">
+          {jsonMode ? (
+            <>
+              <div className="form-label">Paste JSON config</div>
+              <textarea value={jsonText} onChange={e=>setJsonText(e.target.value)} rows={15} placeholder='{"id":"...","name":"...","categories":[...]}' />
+              <div style={{marginTop:8,display:'flex',gap:8}}>
+                <button className="btn btn-accent" onClick={handleImportJson}>Parse JSON</button>
+                <button className="btn" onClick={()=>setJsonMode(false)}>Back to editor</button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="form-row">
+                <div><div className="form-label">Config ID (url-safe)</div><input type="text" value={cfg.id} onChange={e=>updateField('id',e.target.value)} placeholder="my-program" /></div>
+                <div><div className="form-label">Display Name</div><input type="text" value={cfg.name} onChange={e=>updateField('name',e.target.value)} placeholder="My Program Requirements" /></div>
+              </div>
+              <div className="form-label">Description</div>
+              <input type="text" value={cfg.description} onChange={e=>updateField('description',e.target.value)} placeholder="Brief description..." style={{marginBottom:12}} />
+
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+                <div className="filter-label" style={{margin:0}}>Requirement Categories</div>
+                <button className="btn btn-sm btn-green" onClick={addCategory}>+ Add Category</button>
+              </div>
+
+              {cfg.categories.map((cat, i) => (
+                <div key={i} className="cat-editor">
+                  <div className="cat-editor-header">
+                    <input type="text" value={cat.name} onChange={e=>updateCat(i,'name',e.target.value)} placeholder="Category name" style={{maxWidth:250,fontWeight:600}} />
+                    <button className="btn btn-sm" style={{color:'var(--accent)'}} onClick={()=>removeCategory(i)}>Remove</button>
+                  </div>
+                  <div className="form-row">
+                    <div><div className="form-label">ID</div><input type="text" value={cat.id} onChange={e=>updateCat(i,'id',e.target.value)} /></div>
+                    <div><div className="form-label">Min Level</div><input type="number" value={cat.minLevel||600} onChange={e=>updateCat(i,'minLevel',+e.target.value)} /></div>
+                    <div><div className="form-label">Badge Color</div><input type="text" value={cat.color||'#60a5fa'} onChange={e=>updateCat(i,'color',e.target.value)} style={{fontFamily:'var(--mono)'}} /></div>
+                  </div>
+                  <div className="form-label">Departments (comma-separated codes)</div>
+                  <input type="text" value={(cat.departments||[]).join(', ')} onChange={e=>updateCat(i,'departments',e.target.value.split(',').map(s=>s.trim()).filter(Boolean))} placeholder="18, 15, 16" style={{marginBottom:6}} />
+                  <div className="form-label">Include courses (comma-separated, e.g. 51-882)</div>
+                  <input type="text" value={(cat.includeCourses||[]).join(', ')} onChange={e=>updateCat(i,'includeCourses',e.target.value.split(',').map(s=>s.trim()).filter(Boolean))} style={{marginBottom:6}} />
+                  <div className="form-label">Exclude courses</div>
+                  <input type="text" value={(cat.excludeCourses||[]).join(', ')} onChange={e=>updateCat(i,'excludeCourses',e.target.value.split(',').map(s=>s.trim()).filter(Boolean))} style={{marginBottom:6}} />
+                  <div className="form-label">Notes</div>
+                  <input type="text" value={cat.notes||''} onChange={e=>updateCat(i,'notes',e.target.value)} />
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+        <div className="modal-footer">
+          {!jsonMode && <button className="btn" onClick={()=>{setJsonText(JSON.stringify(cfg,null,2));setJsonMode(true);}}>Edit as JSON</button>}
+          {!jsonMode && <button className="btn" onClick={handleExport}>Export .json</button>}
+          {!jsonMode && <button className="btn btn-accent" onClick={()=>{onSave(cfg);onClose();}}>Save & Use</button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Config Picker Modal ──
+function ConfigPickerModal({configs, activeId, onSelect, onClose, onEdit, onCreate, onLoadUrl, onLoadFile}) {
+  const [urlInput, setUrlInput] = useState('');
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" style={{maxWidth:550}} onClick={e=>e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>Requirement Configs</h2>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="modal-body">
+          <div className="info-box note">
+            Configs define which courses count toward your degree requirements. Each config has categories (like "CIT Elective" or "General Tech") with department lists, level minimums, and include/exclude rules.
+          </div>
+
+          {configs.map(c => (
+            <div key={c.id} className={`config-card ${c.id===activeId?'active':''}`} onClick={()=>{onSelect(c.id);onClose();}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'start'}}>
+                <div>
+                  <h4>{c.name}</h4>
+                  <p>{c.description}</p>
+                  <p style={{fontSize:11,color:'var(--text-muted)',marginTop:2}}>{c.categories?.length||0} categories</p>
+                </div>
+                <button className="btn btn-sm" onClick={e=>{e.stopPropagation();onEdit(c);}}>Edit</button>
+              </div>
+            </div>
+          ))}
+
+          <div className="divider" />
+
+          <div style={{display:'flex',gap:8,marginBottom:12}}>
+            <button className="btn btn-green" onClick={onCreate}>+ Create New Config</button>
+            <div className="ics-upload">
+              <input type="file" id="cfg-file" accept=".json" onChange={e=>{const f=e.target.files[0];if(f){const r=new FileReader();r.onload=ev=>{try{onLoadFile(JSON.parse(ev.target.result));}catch(err){alert('Invalid JSON');}};r.readAsText(f);}}} />
+              <label htmlFor="cfg-file" style={{padding:'6px 12px',border:'1px solid var(--border)',borderStyle:'solid',borderRadius:'var(--radius)'}}>Import .json file</label>
+            </div>
+          </div>
+
+          <div className="form-label">Load config from URL</div>
+          <div style={{display:'flex',gap:6}}>
+            <input type="text" value={urlInput} onChange={e=>setUrlInput(e.target.value)} placeholder="https://example.com/configs/my-config.json" />
+            <button className="btn btn-sm btn-accent" onClick={()=>{if(urlInput)onLoadUrl(urlInput);}}>Load</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main App ──
+function App() {
+  const [courseData, setCourseData] = useState(null);
+  const [loadError, setLoadError] = useState(null);
+  const [search, setSearch] = useState('');
+  const [minLevel, setMinLevel] = useState(600);
+  const [selectedDepts, setSelectedDepts] = useState(new Set());
+  const [reqFilter, setReqFilter] = useState('any');
+  const [blocked, setBlocked] = useState([]);
+  const [filterConflicts, setFilterConflicts] = useState(true);
+  const [expanded, setExpanded] = useState(null);
+  const [blockDays, setBlockDays] = useState('TR');
+  const [blockStart, setBlockStart] = useState('11:00AM');
+  const [blockEnd, setBlockEnd] = useState('12:20PM');
+
+  // Config state
+  const [configs, setConfigs] = useState([]);
+  const [activeConfigId, setActiveConfigId] = useState(null);
+  const [showConfigPicker, setShowConfigPicker] = useState(false);
+  const [showConfigEditor, setShowConfigEditor] = useState(false);
+  const [editingConfig, setEditingConfig] = useState(null);
+
+  const activeConfig = useMemo(() => configs.find(c=>c.id===activeConfigId), [configs, activeConfigId]);
+
+  // Load course data
+  useEffect(() => {
+    fetch('data/courses.json')
+      .then(r => {if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();})
+      .then(d => setCourseData(d))
+      .catch(e => setLoadError(e.message));
+  }, []);
+
+  // Load built-in configs
+  useEffect(() => {
+    for (const name of BUILTIN_CONFIGS) {
+      fetch(`configs/${name}.json`)
+        .then(r=>r.ok?r.json():null)
+        .then(d=>{if(d)setConfigs(prev=>{if(prev.find(c=>c.id===d.id))return prev;return[...prev,d];});})
+        .catch(()=>{});
+    }
+    // Load from localStorage
+    try {
+      const saved = localStorage.getItem('cmu-schedule-helper-configs');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setConfigs(prev => {
+          const ids = new Set(prev.map(c=>c.id));
+          return [...prev, ...parsed.filter(c=>!ids.has(c.id))];
+        });
+      }
+      const activeId = localStorage.getItem('cmu-schedule-helper-active-config');
+      if (activeId) setActiveConfigId(activeId);
+    } catch(e) {}
+  }, []);
+
+  // Persist configs
+  useEffect(() => {
+    if (configs.length) {
+      try {
+        const custom = configs.filter(c => !BUILTIN_CONFIGS.includes(c.id));
+        localStorage.setItem('cmu-schedule-helper-configs', JSON.stringify(custom));
+      } catch(e) {}
+    }
+  }, [configs]);
+
+  useEffect(() => {
+    if (activeConfigId) {
+      try { localStorage.setItem('cmu-schedule-helper-active-config', activeConfigId); } catch(e) {}
+    }
+  }, [activeConfigId]);
+
+  const saveConfig = useCallback((cfg) => {
+    setConfigs(prev => {
+      const idx = prev.findIndex(c=>c.id===cfg.id);
+      if (idx >= 0) { const next=[...prev]; next[idx]=cfg; return next; }
+      return [...prev, cfg];
+    });
+    setActiveConfigId(cfg.id);
+  }, []);
+
+  const loadConfigUrl = useCallback((url) => {
+    fetch(url)
+      .then(r=>r.json())
+      .then(cfg=>{saveConfig(cfg);setShowConfigPicker(false);})
+      .catch(e=>alert('Failed to load config: '+e.message));
+  }, [saveConfig]);
+
+  const courses = courseData?.courses || [];
+
+  const toggleDept = useCallback(d => {
+    setSelectedDepts(prev => {const n=new Set(prev);n.has(d)?n.delete(d):n.add(d);return n;});
+  }, []);
+
+  const selectDeptGroup = useCallback(depts => {
+    setSelectedDepts(prev => {const n=new Set(prev);const all=depts.every(d=>n.has(d));depts.forEach(d=>all?n.delete(d):n.add(d));return n;});
+  }, []);
+
+  const addBlock = useCallback(() => {
+    const ds=expandDays(blockDays),s=parseTime(blockStart),e=parseTime(blockEnd);
+    if(!ds.length||s==null||e==null)return;
+    setBlocked(prev=>[...prev,...ds.map(d=>[d,s,e])]);
+  }, [blockDays,blockStart,blockEnd]);
+
+  const handleICS = useCallback(e => {
+    const file=e.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{const blocks=parseICS(ev.target.result);setBlocked(prev=>[...prev,...blocks]);};
+    reader.readAsText(file);
+  }, []);
+
+  const filtered = useMemo(() => {
+    const searchLower = search.toLowerCase();
+    return courses.filter(c => {
+      if (c.level < minLevel) return false;
+      if (selectedDepts.size && !selectedDepts.has(c.dept)) return false;
+
+      // Requirement filter
+      if (reqFilter !== 'any' && activeConfig) {
+        const cat = activeConfig.categories.find(cat => cat.id === reqFilter);
+        if (cat && !courseMatchesCategory(c, cat)) return false;
+      }
+
+      if (filterConflicts && blocked.length && !courseHasOption(c, blocked)) return false;
+      if (searchLower) {
+        const hay = `${c.num} ${c.title} ${c.deptName}`.toLowerCase();
+        if (!hay.includes(searchLower)) return false;
+      }
+      return true;
+    });
+  }, [courses,search,minLevel,selectedDepts,reqFilter,blocked,filterConflicts,activeConfig]);
+
+  const grouped = useMemo(() => {
+    const g={};
+    for(const c of filtered){if(!g[c.deptName])g[c.deptName]=[];g[c.deptName].push(c);}
+    return Object.entries(g).sort((a,b)=>a[0].localeCompare(b[0]));
+  }, [filtered]);
+
+  const allDepts = useMemo(() => {
+    const s=new Set();courses.forEach(c=>{if(c.level>=minLevel)s.add(c.dept);});return[...s].sort();
+  }, [courses,minLevel]);
+
+  function getCategoryBadges(course) {
+    if (!activeConfig) return null;
+    return activeConfig.categories
+      .filter(cat => courseMatchesCategory(course, cat))
+      .map(cat => <span key={cat.id} className="req-badge" style={{background:cat.color+'20',color:cat.color}}>{cat.name}</span>);
+  }
+
+  if (loadError) return <div className="loading"><span style={{color:'var(--accent)'}}>Failed to load course data</span><span>{loadError}</span><span style={{fontSize:11}}>Make sure data/courses.json exists</span></div>;
+  if (!courseData) return <div className="loading"><div style={{width:20,height:20,border:'2px solid var(--border)',borderTopColor:'var(--accent)',borderRadius:'50%',animation:'spin 0.6s linear infinite'}} /><span>Loading courses...</span><style>{'@keyframes spin{to{transform:rotate(360deg)}}'}</style></div>;
+
+  return (
+    <>
+      <header className="app-header">
+        <div className="header-left">
+          <div className="app-title">CMU Schedule Helper</div>
+          <div className="app-semester">
+            {courseData.semester} <span>— {filtered.length} / {courses.length}</span>
+          </div>
+        </div>
+        <div className="header-right">
+          <button className="btn" onClick={()=>setShowConfigPicker(true)}>
+            {activeConfig ? activeConfig.name : 'No config loaded'}
+            <span style={{fontSize:10,opacity:0.6}}>▼</span>
+          </button>
+        </div>
+      </header>
+
+      <div className="layout">
+        <aside className="sidebar">
+          <div className="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" placeholder="Search courses..." value={search} onChange={e=>setSearch(e.target.value)} />
+          </div>
+
+          <div className="filter-section">
+            <div className="filter-label">Minimum Level</div>
+            <select value={minLevel} onChange={e=>setMinLevel(+e.target.value)}>
+              <option value={0}>All levels</option>
+              {[100,200,300,400,500,600,700,800].map(l=><option key={l} value={l}>{l}+{l===600?' (Graduate)':''}</option>)}
+            </select>
+          </div>
+
+          {/* Requirement Filter - from active config */}
+          {activeConfig && activeConfig.categories.length > 0 && (
+            <div className="filter-section">
+              <div className="filter-label">Requirement Filter</div>
+              <div className="chip-group">
+                <span className={`chip ${reqFilter==='any'?'active':''}`} onClick={()=>setReqFilter('any')}>All</span>
+                {activeConfig.categories.map(cat => (
+                  <span key={cat.id} className={`chip ${reqFilter===cat.id?'active':''}`}
+                    style={reqFilter===cat.id?{background:cat.color+'20',borderColor:cat.color,color:cat.color}:{}}
+                    onClick={()=>setReqFilter(reqFilter===cat.id?'any':cat.id)}>
+                    {cat.name}
+                  </span>
+                ))}
+              </div>
+              {reqFilter !== 'any' && activeConfig.categories.find(c=>c.id===reqFilter)?.notes && (
+                <div style={{fontSize:11,color:'var(--text-muted)',marginTop:6,lineHeight:1.4}}>
+                  {activeConfig.categories.find(c=>c.id===reqFilter).notes}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="filter-section">
+            <div className="filter-label">Department Groups</div>
+            <div className="chip-group" style={{marginBottom:6}}>
+              {Object.entries(DEPT_GROUPS).map(([name,depts])=>{
+                const allSel=depts.every(d=>selectedDepts.has(d));
+                return <span key={name} className={`chip ${allSel?'active-green':''}`} onClick={()=>selectDeptGroup(depts)}>{name}</span>;
+              })}
+              {selectedDepts.size>0&&<span className="chip btn-accent" onClick={()=>setSelectedDepts(new Set())}>Clear</span>}
+            </div>
+            <div className="filter-label">Individual Depts</div>
+            <div className="chip-group">
+              {allDepts.map(d=><span key={d} className={`chip ${selectedDepts.has(d)?'active':''}`} onClick={()=>toggleDept(d)} title={DEPT_NAMES[d]||d}>{d}</span>)}
+            </div>
+          </div>
+
+          <div className="divider"/>
+
+          <div className="filter-section">
+            <div className="filter-label">Block Time Slots</div>
+            <div className="time-block">
+              <input type="text" value={blockDays} onChange={e=>setBlockDays(e.target.value.toUpperCase())} placeholder="TR" style={{maxWidth:46}}/>
+              <input type="text" value={blockStart} onChange={e=>setBlockStart(e.target.value)} placeholder="11:00AM"/>
+              <span style={{color:'var(--text-muted)',fontSize:12}}>–</span>
+              <input type="text" value={blockEnd} onChange={e=>setBlockEnd(e.target.value)} placeholder="12:20PM"/>
+              <button className="btn btn-sm btn-accent" onClick={addBlock}>+</button>
+            </div>
+            <div style={{fontSize:10,color:'var(--text-muted)',marginBottom:6}}>Days: M T W R F (R=Thu)</div>
+
+            <div className="ics-upload">
+              <input type="file" id="ics" accept=".ics" onChange={handleICS}/>
+              <label htmlFor="ics">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Import .ics calendar
+              </label>
+            </div>
+
+            {blocked.length>0&&<div style={{marginTop:6}}>{blocked.map((b,i)=>(
+              <div key={i} className="blocked-item"><span>{b[0]} {fmtMin(b[1])}–{fmtMin(b[2])}</span><button onClick={()=>setBlocked(prev=>prev.filter((_,j)=>j!==i))}>×</button></div>
+            ))}</div>}
+
+            {blocked.length>0&&<div className="toggle-row" style={{marginTop:6}}>
+              <span className="toggle-label">Hide conflicting courses</span>
+              <div className={`toggle ${filterConflicts?'on':''}`} onClick={()=>setFilterConflicts(!filterConflicts)}/>
+            </div>}
+          </div>
+        </aside>
+
+        <main className="main-content">
+          <div className="results-header">
+            <div className="results-count">
+              <strong>{filtered.length}</strong> courses
+              {reqFilter!=='any'&&activeConfig&&<> matching <strong>{activeConfig.categories.find(c=>c.id===reqFilter)?.name}</strong></>}
+              {blocked.length>0&&filterConflicts&&<> · conflicts hidden</>}
+            </div>
+          </div>
+
+          {filtered.length===0?(
+            <div className="empty-state"><h3>No courses match</h3><p>Try adjusting your filters or removing blocked time slots.</p></div>
+          ):(
+            grouped.map(([deptName,list])=>(
+              <div key={deptName} className="dept-group">
+                <div className="dept-group-header">{deptName} ({list.length})</div>
+                {list.sort((a,b)=>a.num.localeCompare(b.num)).map(c=>{
+                  const isExp=expanded===c.num;
+                  return(
+                    <div key={c.num}>
+                      <div className="course-row" onClick={()=>setExpanded(isExp?null:c.num)}>
+                        <div className="course-num">{c.num}</div>
+                        <div className="course-title">{c.title}{getCategoryBadges(c)}</div>
+                        <div className="course-units">{c.units}u</div>
+                      </div>
+                      {isExp&&(
+                        <div className="expanded-detail">
+                          <div className="detail-grid">
+                            {c.sections.map((s,i)=>{
+                              const conflict=blocked.length>0&&secConflicts([s.id,s.days,s.begin,s.end],blocked);
+                              const isTba=s.days==='TBA'||!s.begin;
+                              return(
+                                <div key={i} className="detail-section" style={conflict?{borderColor:'var(--accent-dim)',opacity:0.5}:isTba?{}:{borderColor:'rgba(52,211,153,0.2)'}}>
+                                  <div className="detail-section-id" style={conflict?{color:'var(--accent)',textDecoration:'line-through'}:{}}>{s.id||'—'}</div>
+                                  <div className="detail-section-time">{isTba?'TBA':`${s.days} ${s.begin}–${s.end}`}{conflict&&' ✕'}</div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ))
+          )}
+        </main>
+      </div>
+
+      {showConfigPicker && (
+        <ConfigPickerModal
+          configs={configs} activeId={activeConfigId}
+          onSelect={id=>{setActiveConfigId(id);setReqFilter('any');}}
+          onClose={()=>setShowConfigPicker(false)}
+          onEdit={cfg=>{setEditingConfig(cfg);setShowConfigEditor(true);setShowConfigPicker(false);}}
+          onCreate={()=>{setEditingConfig(null);setShowConfigEditor(true);setShowConfigPicker(false);}}
+          onLoadUrl={loadConfigUrl}
+          onLoadFile={cfg=>{saveConfig(cfg);setShowConfigPicker(false);}}
+        />
+      )}
+
+      {showConfigEditor && (
+        <ConfigEditorModal
+          initial={editingConfig}
+          onSave={saveConfig}
+          onClose={()=>setShowConfigEditor(false)}
+        />
+      )}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

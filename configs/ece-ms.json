@@ -1,0 +1,55 @@
+{
+  "id": "ece-ms",
+  "name": "ECE M.S. Elective Requirements",
+  "description": "Elective requirements for the ECE Master of Science degree at Carnegie Mellon University.",
+  "categories": [
+    {
+      "id": "cit-elective",
+      "name": "CIT Elective",
+      "description": "24 units (or 12 for Intensive Project) of graduate coursework (600+) within CIT departments.",
+      "color": "#60a5fa",
+      "minLevel": 600,
+      "departments": ["18", "39", "42", "06", "12", "19", "14", "49", "27", "24", "04"],
+      "excludeCourses": [
+        "19-602", "19-655",
+        "49-750", "49-751", "49-761", "49-762", "49-763", "49-764", "49-765",
+        "49-766", "49-767", "49-770", "49-771", "49-772", "49-773", "49-774",
+        "49-775", "49-780", "49-781", "49-782", "49-788", "49-790", "49-791",
+        "49-792", "49-793",
+        "24-792",
+        "04-601", "04-602", "04-605", "04-900", "04-980"
+      ],
+      "notes": "39-699 and 18-994 count as elective only. Excluded CIT courses may still count toward General Technical Elective."
+    },
+    {
+      "id": "general-tech",
+      "name": "General Technical Elective",
+      "description": "12 units of coursework (600+) from approved programs or individually approved courses.",
+      "color": "#34d399",
+      "minLevel": 600,
+      "departments": [
+        "18", "39", "42", "06", "12", "19", "14", "49", "27", "24", "04",
+        "36", "86",
+        "95", "94",
+        "03", "09", "21", "33",
+        "02", "15", "08", "16", "05", "11", "10", "17",
+        "45",
+        "53"
+      ],
+      "includeCourses": [
+        "46-926", "46-929",
+        "47-830", "47-834",
+        "51-882",
+        "57-947", "57-948",
+        "80-713", "80-816",
+        "84-688",
+        "85-705", "85-777",
+        "90-756", "90-808",
+        "93-711",
+        "99-783"
+      ],
+      "excludeCourses": [],
+      "notes": "Courses from any of the listed programs, plus individually approved courses."
+    }
+  ]
+}
